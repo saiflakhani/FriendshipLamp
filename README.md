@@ -111,47 +111,25 @@ sudo ln -s /etc/nginx/sites-available/friendshiplamp /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 ```
 
-### 2. Configure Systemd Service (Gunicorn)
+### 2. Running Your Server
 
-Create a service file to run the server continuously in the background using Gunicorn:
+To run your server continuously in the background, you can use a terminal multiplexer like `tmux` or `screen` and simply run the Flask development server. Flask's debug mode will automatically detect file changes when `git pull` is run!
+
 ```bash
-sudo nano /etc/systemd/system/friendshiplamp.service
+sudo apt install tmux
+tmux new -s lamp
+cd /path/to/FriendshipLamp
+source venv/bin/activate
+python server/app.py
 ```
+You can then detach by pressing `Ctrl+B`, then `D`. Your server is now running in the background!
 
-```ini
-[Unit]
-Description=Gunicorn instance to serve Friendship Lamp API
-After=network.target
+### 3. Configure the Webhook on GitHub
 
-[Service]
-User=your_linux_user
-Group=www-data
-WorkingDirectory=/path/to/FriendshipLamp
-Environment="PATH=/path/to/FriendshipLamp/venv/bin"
-ExecStart=/path/to/FriendshipLamp/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:5000 wsgi:app
-
-[Install]
-WantedBy=multi-user.target
-```
-Enable and start it:
-```bash
-sudo systemctl daemon-reload
-sudo systemctl start friendshiplamp
-sudo systemctl enable friendshiplamp
-```
-
-### 3. Grant Webhook Restart Permissions
-
-The `POST /api/github-webhook` endpoint runs the `deploy.sh` script, which attempts to restart the systemd service. To allow this without a password prompt, run `sudo visudo` and append:
-
-```
-your_linux_user ALL=(ALL) NOPASSWD: /bin/systemctl restart friendshiplamp.service
-```
-
-### 4. Configure the Webhook on GitHub
+The `POST /api/github-webhook` endpoint automatically runs `git pull origin master`. When this happens, Flask detects the updated files and automatically restarts to serve the new code.
 
 1. Go to **Settings > Webhooks > Add webhook** in your repository.
 2. **Payload URL**: `http://api.yourdomain.com/api/github-webhook`
 3. **Content type**: `application/json`
 4. **Which events**: "Just the push event".
-5. Save! Your server will now auto-deploy when you push to `main` (or `master`).
+5. Save! Your server will now auto-deploy when you push to `master`.

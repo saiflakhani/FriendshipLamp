@@ -25,10 +25,11 @@ def github_webhook():
     # Optional: You can verify the GitHub webhook secret here
     # signature = request.headers.get('X-Hub-Signature-256')
     
-    # Run the deployment script to pull and restart the service
+    # Just a simple git pull for now
     try:
+        # Run git pull
         result = subprocess.run(
-            ["/home/saif/Code/FriendshipLamp/deploy.sh"], 
+            ["git", "pull", "origin", "master"], 
             capture_output=True, 
             text=True, 
             check=True
