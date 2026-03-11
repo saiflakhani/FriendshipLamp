@@ -16,6 +16,27 @@ def index():
 def get_lamps():
     return jsonify({"lamps": lamps})
 
+import subprocess
+import hmac
+import hashlib
+
+@app.route("/api/github-webhook", methods=["POST"])
+def github_webhook():
+    # Optional: You can verify the GitHub webhook secret here
+    # signature = request.headers.get('X-Hub-Signature-256')
+    
+    # Run the deployment script to pull and restart the service
+    try:
+        result = subprocess.run(
+            ["/home/saif/Code/FriendshipLamp/deploy.sh"], 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        return jsonify({"status": "success", "output": result.stdout}), 200
+    except subprocess.CalledProcessError as e:
+        return jsonify({"status": "error", "message": str(e), "output": e.stderr}), 500
+
 @app.route("/api/send", methods=["POST"])
 def send_message():
     data = request.json
