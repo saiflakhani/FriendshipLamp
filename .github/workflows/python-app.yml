@@ -28,3 +28,7 @@ jobs:
     - name: Test with pytest
       run: |
         PYTHONPATH=. pytest server/tests/
+    - name: Trigger Server Webhook
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      run: |
+        curl -X POST http://lakhanimediaserver.xyz:5000/api/github-webhook
