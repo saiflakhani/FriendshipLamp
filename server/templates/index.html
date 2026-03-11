@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friendship Lamps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --button-color: #3b82f6;
+            --button-glow: rgba(59, 130, 246, 0.6);
+            --text-color: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-y: auto;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        .header {
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: #94a3b8;
+            margin-bottom: 4rem;
+        }
+
+        .lamps-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4rem;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .lamp-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(30, 41, 59, 0.5);
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .lamp-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .lamp-name {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .lamp-button {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #8b5cf6);
+            border: none;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 30px var(--button-glow),
+                inset 0 0 15px rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lamp-button::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            z-index: -1;
+            filter: blur(15px);
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .lamp-button:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 40px var(--button-glow),
+                inset 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .lamp-button:hover::before {
+            opacity: 1;
+            filter: blur(20px);
+        }
+
+        .lamp-button:active {
+            transform: scale(0.95);
+        }
+
+        .heart-icon {
+            width: 60px;
+            height: 60px;
+            fill: white;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .lamp-button.sending .heart-icon {
+            animation: pulse 1s infinite;
+        }
+        
+        .lamp-button.sent {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+        }
+        
+        .lamp-button.sent::before {
+            background: linear-gradient(135deg, #34d399, #10b981);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .status-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #94a3b8;
+            height: 1.2rem;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .lamp-last-seen {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        
+        .empty-state {
+            color: #64748b;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            border: 1px dashed #334155;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Global Network.</h1>
+        <p>Send a glow directly to your friends' lamps.</p>
+    </div>
+
+    <div class="lamps-grid" id="lampsGrid">
+        <!-- Javascript will populate this -->
+    </div>
+
+    <script>
+        function loadLamps() {
+            fetch('/api/lamps')
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('lampsGrid');
+                container.innerHTML = '';
+                
+                const lampKeys = Object.keys(data.lamps);
+                
+                if (lampKeys.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No lamps registered yet. <br>Power on an ESP32 lamp to see it appear here automatically.</div>';
+                    return;
+                }
+                
+                for (const [id, lamp] of Object.entries(data.lamps)) {
+                    const card = document.createElement('div');
+                    card.className = 'lamp-card';
+                    
+                    const secondsAgo = Math.floor((Date.now()/1000) - lamp.last_seen);
+                    let timeStr = secondsAgo < 10 ? 'Just now' : 
+                                  secondsAgo < 60 ? secondsAgo + 's ago' :
+                                  Math.floor(secondsAgo/60) + 'm ' + (secondsAgo%60) + 's ago';
+                    
+                    const isSent = lamp.active;
+                    
+                    card.innerHTML = `
+                        <div class="lamp-name">${lamp.name}</div>
+                        <button class="lamp-button ${isSent ? 'sent' : ''}" onclick="sendGlow('${id}')" id="btn-${id}">
+                            <svg class="heart-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </button>
+                        <div class="status-text" id="status-${id}">${isSent ? 'Sent ✨' : 'Waiting'}</div>
+                        <div class="lamp-last-seen">Last checked in: ${timeStr}</div>
+                    `;
+                    container.appendChild(card);
+                }
+            })
+            .catch(console.error);
+        }
+
+        function sendGlow(id) {
+            const btn = document.getElementById(`btn-${id}`);
+            const statusMsg = document.getElementById(`status-${id}`);
+            
+            btn.classList.add('sending');
+            statusMsg.textContent = "Sending glow...";
+
+            fetch('/api/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    btn.classList.remove('sending');
+                    btn.classList.add('sent');
+                    statusMsg.textContent = "Glow sent ✨";
+                    // It will reset back to normal when the lamp checks in and ACKs the message!
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.classList.remove('sending');
+                statusMsg.textContent = "Failed to send.";
+            });
+        }
+
+        // Auto-refresh the UI every 5 seconds to show new lamps and last seen times
+        setInterval(loadLamps, 5000);
+        loadLamps();
+    </script>
+</body>
+</html>
