@@ -14,7 +14,14 @@ def index():
 
 @app.route("/api/lamps", methods=["GET"])
 def get_lamps():
-    return jsonify({"lamps": lamps})
+    # Only return lamps that have been seen in the last hour (3600 seconds)
+    current_time = time.time()
+    active_lamps = {
+        lamp_id: data 
+        for lamp_id, data in lamps.items() 
+        if (current_time - data.get("last_seen", 0)) < 3600
+    }
+    return jsonify({"lamps": active_lamps})
 
 import subprocess
 import hmac
