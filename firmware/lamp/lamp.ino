@@ -7,6 +7,10 @@ const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
 // Replace with your flask server IP or Domain Name
 const char* SERVER_BASE_URL = "http://friendshiplamp.lakhanimediaserver.xyz";
 
+// Lamp Configuration
+const char* LAMP_NAME = "Saif's Lamp"; // The name that will appear on the website
+const int BLINK_TIMES = 3;             // How many times it blinks when a message arrives
+
 const int LED_PIN = 2; // Onboard LED on most ESP32 Dev Boards. Use an external LED with resistor if desired.
 const int SLEEP_MINUTES = 3;
 
@@ -105,7 +109,7 @@ void setup() {
   String lampId = getMacAddress();
 
   HTTPClient http;
-  String statusUrl = String(SERVER_BASE_URL) + "/api/lamp/status?id=" + lampId;
+  String statusUrl = String(SERVER_BASE_URL) + "/api/lamp/status?id=" + lampId + "&name=" + String(LAMP_NAME);
   String ackUrl = String(SERVER_BASE_URL) + "/api/lamp/ack?id=" + lampId;
 
   Serial.println("[HTTP] Checking server: " + statusUrl);
@@ -121,7 +125,7 @@ void setup() {
         if (payload.indexOf("\"active\": true") > 0 || payload.indexOf("\"active\":true") > 0) {
           Serial.println("Friend is thinking of you! Blinking LED...");
           
-          blinkLED(3);
+          blinkLED(BLINK_TIMES);
           
           HTTPClient ackHttp;
           if (ackHttp.begin(ackUrl)) {

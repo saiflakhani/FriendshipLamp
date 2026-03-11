@@ -57,18 +57,26 @@ def send_message():
 @app.route("/api/lamp/status", methods=["GET"])
 def lamp_status():
     lamp_id = request.args.get("id")
+    lamp_name = request.args.get("name")
+    
     if not lamp_id:
         return jsonify({"error": "Missing id parameter"}), 400
+        
+    if not lamp_name:
+        lamp_name = f"Lamp {lamp_id[-4:]}"
+        
+    current_time = time.time()
         
     # Register or update last seen
     if lamp_id not in lamps:
         lamps[lamp_id] = {
-            "name": f"Lamp {lamp_id[-4:]}", 
+            "name": lamp_name, 
             "active": False,
-            "last_seen": time.time()
+            "last_seen": current_time
         }
     else:
-        lamps[lamp_id]["last_seen"] = time.time()
+        lamps[lamp_id]["last_seen"] = current_time
+        lamps[lamp_id]["name"] = lamp_name
         
     return jsonify(lamps[lamp_id])
 
