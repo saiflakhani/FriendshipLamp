@@ -4,8 +4,8 @@
 const char* WIFI_SSID = "YOUR_WIFI_SSID";
 const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
 
-// Replace with your flask server IP
-const char* SERVER_BASE_URL = "http://192.168.1.X:5000";
+// Replace with your flask server IP or Domain Name
+const char* SERVER_BASE_URL = "http://friendshiplamp.lakhanimediaserver.xyz";
 
 const int LED_PIN = 2; // Onboard LED on most ESP32 Dev Boards. Use an external LED with resistor if desired.
 const int SLEEP_MINUTES = 3;
